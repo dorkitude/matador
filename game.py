@@ -1,10 +1,10 @@
 import sys
 import code
 import itertools
-from globals import *
-from models import Foo, Player
 from time import sleep
 from math import ceil
+from globals import *
+from sprites import Player, Foo
 
 # Initialize Pygame
 pygame.init()
@@ -36,25 +36,12 @@ def setup_background():
         screen.blit(tile, (x*brick_width, y*brick_height))
 
 
-# Make the ball
-ball = Foo()
-ball.radius = 20
-ball.x = 300
-ball.y = 200
-ball.vel_x = 5  # Initial velocity (move right)
-ball.vel_y = 5  # Initial velocity (move down)
-
 # make the player
 player = Player()
-player.width = 64
-player.height = 64
 player.x = 100
 player.y = 300
 player.vel_x = 0  # Initial velocity (no movement)
 player.vel_y = 0  # Initial velocity (no movement)
-
-# colors
-ball.color = (200, 200, 200)
 
 # Run the game loop
 running = True
@@ -79,21 +66,24 @@ while running:
     # Handle key input
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-        player.vel_x = -5  # Move left
+        vel_x = -player.speed  # Move left
     elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-        player.vel_x = 5  # Move right
+        vel_x = player.speed  # Move right
     else:
-        player.vel_x = 0  # Stop movement
+        vel_x = 0  # Stop movement
     if keys[pygame.K_UP] or keys[pygame.K_w]:
-        player.vel_y = -5  # Move up
+        vel_y = -player.speed  # Move up
     elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
-        player.vel_y = 5  # Move down
+        vel_y = player.speed  # Move down
     else:
-        player.vel_y = 0  # Stop movement
+        vel_y = 0  # Stop movement
+
+    player.velocity = vec(vel_x, vel_y)
 
     # Update the playet position
-    player.x += player.vel_x
-    player.y += player.vel_y
+    new_position = player.position + player.velocity
+    player.x = new_position[0]
+    player.y = new_position[1]
 
     # Keep the player within the window boundaries
     if player.x < 0:
@@ -109,27 +99,10 @@ while running:
     # Update the game state
     # ...
 
-    # Update the ball position
-    ball.x += ball.vel_x
-    ball.y += ball.vel_y
-
-    # Check for ball collision with the walls
-    if ball.x - ball.radius < 0 or ball.x + ball.radius > window_size[0]:
-        ball.vel_x *= -1  # Reverse the horizontal velocity
-    if ball.y - ball.radius < 0 or ball.y + ball.radius > window_size[1]:
-        ball.vel_y *= -1  # Reverse the vertical velocity
-
-    # Draw the player
-    # Calculate the points of the U-shaped player
-    # code.interact(local=dict(globals(), **locals()))
     screen.blit(player.image, player.position)
 
-    # Draw the playet
-    # pygame.draw.polygon(screen, player.color, player.points)
+    print(f"player.position = {player.position}")
 
-
-    # Draw the ball
-    pygame.draw.circle(screen, ball.color, (ball.x, ball.y), ball.radius)
 
 
     pygame.display.update()

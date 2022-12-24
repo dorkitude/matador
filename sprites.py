@@ -1,5 +1,5 @@
 from globals import *
-import math
+import random
 
 class Foo(object):
     def __init__(self, **kwargs):
@@ -67,7 +67,11 @@ class Enemy(BaseSprite):
 
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("sprites/lizard_f_idle_anim_f3.png").convert()
+
+        if random.randint(1,10) > 2:
+            self.image = pygame.image.load("sprites/lizard_f_idle_anim_f3.png").convert()
+        else:
+            self.image = pygame.image.load("sprites/skull_v1_4.png").convert()
         self.rect = self.image.get_rect()
 
         # Position and direction

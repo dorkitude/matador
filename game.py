@@ -1,5 +1,5 @@
 import sys
-import code
+import random
 import itertools
 from time import sleep
 from math import ceil
@@ -40,10 +40,12 @@ enemies = pygame.sprite.Group()
 
 def spawn_enemy():
     print("spawning an enemy")
-    enemy = Enemy()
-    enemy.x = 700
-    enemy.y = 500
-    enemies.add(enemy)
+
+    for i in range(random.randint(1,3)):
+        enemy = Enemy()
+        enemy.x = random.randint(400,700)
+        enemy.y = random.randint(300,500)
+        enemies.add(enemy)
 
 
 pygame.time.set_timer(EVENT_SPAWNER_COOLDOWN, 5000)
@@ -55,7 +57,6 @@ while running:
 
     # Handle events
     for event in pygame.event.get():
-        print (event.type)
         if event.type == pygame.QUIT:
             running = False
             pygame.quit()

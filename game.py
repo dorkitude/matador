@@ -4,10 +4,12 @@ import itertools
 from time import sleep
 from math import ceil
 from globals import *
-from sprites import Player, Foo
+from sprites import Player, Enemy
 
 # Initialize Pygame
 pygame.init()
+
+
 
 
 pink = (255, 64, 64)
@@ -25,8 +27,6 @@ def setup_background():
     brick_width = tile.get_width()
     brick_height = tile.get_height()
     for x,y in itertools.product(range(0,ceil(800/brick_width)), range(0,ceil(600/brick_height))):
-        # print(f"attempting to draw at {x},{y}")
-        # code.interact(local=dict(globals(), **locals()))
         screen.blit(tile, (x*brick_width, y*brick_height))
 
 
@@ -35,25 +35,41 @@ player = Player()
 player.x = 100
 player.y = 300
 
+# make the enemies group
+enemies = pygame.sprite.Group()
+
+def spawn_enemy():
+    print("spawning an enemy")
+    enemy = Enemy()
+    enemy.x = 700
+    enemy.y = 500
+    enemies.add(enemy)
+
+
+pygame.time.set_timer(EVENT_SPAWNER_COOLDOWN, 5000)
+
+spawn_enemy()
 # Run the game loop
 running = True
 while running:
-    setup_background()
-  # Handle events
+
+    # Handle events
     for event in pygame.event.get():
+        print (event.type)
         if event.type == pygame.QUIT:
             running = False
             pygame.quit()
             sys.exit()
+        if event.type == EVENT_SPAWNER_COOLDOWN:
+            spawn_enemy()
 
+        # For events that occur upon clicking the mouse (left click)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+                pass
 
-    # For events that occur upon clicking the mouse (left click)
-    if event.type == pygame.MOUSEBUTTONDOWN:
-            pass
-
-    # Event handling for a range of different key presses
-    if event.type == pygame.KEYDOWN:
-            pass
+        # Event handling for a range of different key presses
+        if event.type == pygame.KEYDOWN:
+                pass
 
     # Handle key input
     keys = pygame.key.get_pressed()
@@ -70,20 +86,24 @@ while running:
     else:
         vel_y = 0  # Stop movement
 
-    velocity = vec(vel_x, vel_y)
 
     # Update the game state
     # ...
+
+    velocity = vec(vel_x, vel_y)
+
     if velocity.length() > 0:
         player.move(velocity)
-        print(f"player.position = {player.position}")
 
     # Update the display
-
+    setup_background()
     screen.blit(player.image, player.position)
 
-    pygame.display.update()
+    for enemy in enemies.sprites():
+        enemy.move_toward(player.position)
+        screen.blit(enemy.image, enemy.position)
 
+    pygame.display.update()
 
     # Wait for the next frame
     pygame.time.delay(frame_duration)

@@ -27,7 +27,6 @@ class BaseSprite(pygame.sprite.Sprite):
 
         velocity = vec(direction[0]*magnitude, direction[1]*magnitude)
 
-        print(f"velocity vector is {velocity}")
         new_position = self.position + velocity
         self.x = new_position[0]
         self.y = new_position[1]
@@ -44,7 +43,6 @@ class BaseSprite(pygame.sprite.Sprite):
 
     def move_toward(self, destination):
         # Update the player position
-        print(f"attempting to more foward {destination}")
         direction = vec((destination[0]-self.x, destination[1]-self.y))
         self.move(direction)
 

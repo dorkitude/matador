@@ -18,3 +18,6 @@ frame_duration = int(1000 / frame_rate)
 
 # Set the window size
 window_size = (800, 600)
+
+
+EVENT_SPAWNER_COOLDOWN = pygame.USEREVENT + 1

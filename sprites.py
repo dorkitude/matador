@@ -183,7 +183,7 @@ class Enemy(BaseSprite, Harmable, Weapon):
 
         if random.randint(1,10) > 2:
             self.hit_points = 5
-            self.image = pygame.image.load("sprites/lizard_f_idle_anim_f3.png").convert()
+            self.image = pygame.image.load("sprites/lizard_f_idle_anim_f3.png").convert_alpha()
         else:
             self.hit_points = 15
             self._damage = 3

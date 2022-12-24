@@ -9,11 +9,6 @@ from sprites import Player, Enemy
 # Initialize Pygame
 pygame.init()
 
-
-
-
-pink = (255, 64, 64)
-
 # Create the window
 screen = pygame.display.set_mode(window_size)
 
@@ -22,7 +17,6 @@ pygame.display.set_caption("Matador Sandbox")
 
 # initial state
 def setup_background():
-    screen.fill((pink))
     tile = pygame.image.load("sprites/desert_tile.png")
     brick_width = tile.get_width()
     brick_height = tile.get_height()

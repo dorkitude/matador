@@ -41,7 +41,9 @@ enemies = pygame.sprite.Group()
 def spawn_enemy():
     print("spawning an enemy")
 
-    for i in range(random.randint(1,3)):
+    spawn_count = random.randint(1,3)
+
+    for i in range(spawn_count):
         enemy = Enemy()
         enemy.x = random.randint(400,700)
         enemy.y = random.randint(300,500)
@@ -101,7 +103,14 @@ while running:
     screen.blit(player.image, player.position)
 
     for enemy in enemies.sprites():
-        enemy.move_toward(player.position)
+        if enemy.collides_with(player):
+            player.take_damage_from(enemy)
+
+        for weapon in player.weapons:
+            if enemy.collides_with(weapon):
+                enemy.take_damage_from(weapon)
+
+        enemy.pursue(player)
         screen.blit(enemy.image, enemy.position)
 
     pygame.display.update()

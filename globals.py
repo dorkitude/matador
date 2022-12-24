@@ -1,5 +1,8 @@
 import pygame
 
+def now():
+  return pygame.time.get_ticks()
+
 # Declaring variables to be used through the program
 vec = pygame.math.Vector2
 HEIGHT = 350

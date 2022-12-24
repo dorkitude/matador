@@ -9,8 +9,6 @@ from sprites import Player, Foo
 # Initialize Pygame
 pygame.init()
 
-# Set the window size
-window_size = (800, 600)
 
 pink = (255, 64, 64)
 
@@ -19,10 +17,6 @@ screen = pygame.display.set_mode(window_size)
 
 # Set the title
 pygame.display.set_caption("Matador Sandbox")
-
-# Set the frame rate
-frame_rate = 60
-frame_duration = int(1000 / frame_rate)
 
 # initial state
 def setup_background():
@@ -40,8 +34,6 @@ def setup_background():
 player = Player()
 player.x = 100
 player.y = 300
-player.vel_x = 0  # Initial velocity (no movement)
-player.vel_y = 0  # Initial velocity (no movement)
 
 # Run the game loop
 running = True
@@ -66,44 +58,29 @@ while running:
     # Handle key input
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-        vel_x = -player.speed  # Move left
+        vel_x = -1  # Move left
     elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-        vel_x = player.speed  # Move right
+        vel_x = 1  # Move right
     else:
         vel_x = 0  # Stop movement
     if keys[pygame.K_UP] or keys[pygame.K_w]:
-        vel_y = -player.speed  # Move up
+        vel_y = -1  # Move up
     elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
-        vel_y = player.speed  # Move down
+        vel_y = 1  # Move down
     else:
         vel_y = 0  # Stop movement
 
-    player.velocity = vec(vel_x, vel_y)
-
-    # Update the playet position
-    new_position = player.position + player.velocity
-    player.x = new_position[0]
-    player.y = new_position[1]
-
-    # Keep the player within the window boundaries
-    if player.x < 0:
-        player.x = 0
-    if player.x + player.width > window_size[0]:
-        player.x = window_size[0] - player.width
-    if player.y < 0:
-        player.y = 0
-    if player.y + player.height > window_size[1]:
-        player.y = window_size[1] - player.height
-
+    velocity = vec(vel_x, vel_y)
 
     # Update the game state
     # ...
+    if velocity.length() > 0:
+        player.move(velocity)
+        print(f"player.position = {player.position}")
+
+    # Update the display
 
     screen.blit(player.image, player.position)
-
-    print(f"player.position = {player.position}")
-
-
 
     pygame.display.update()
 

@@ -179,8 +179,6 @@ class Enemy(BaseSprite, Harmable, Weapon):
     def __init__(self):
         super().__init__()
 
-        self.speed = random.choice([1])
-
         if random.randint(1,10) > 2:
             self.hit_points = 5
             self.image = pygame.image.load("sprites/lizard_f_idle_anim_f3.png").convert_alpha()

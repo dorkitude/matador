@@ -30,7 +30,7 @@ player.x = 100
 player.y = 300
 
 # make the enemies group
-enemies = pygame.sprite.Group()
+enemies = []
 
 def spawn_enemy():
     print("spawning an enemy")
@@ -41,7 +41,7 @@ def spawn_enemy():
         enemy = Enemy()
         enemy.x = random.randint(400,700)
         enemy.y = random.randint(300,500)
-        enemies.add(enemy)
+        enemies.append(enemy)
 
 
 pygame.time.set_timer(EVENT_SPAWNER_COOLDOWN, 5000)
@@ -68,7 +68,7 @@ while running:
         if event.type == pygame.KEYDOWN:
                 pass
 
-    # Handle key input
+    # Handle WASD and Arrow-key input
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT] or keys[pygame.K_a]:
         vel_x = -1  # Move left
@@ -83,20 +83,13 @@ while running:
     else:
         vel_y = 0  # Stop movement
 
+    player_velocity = vec(vel_x, vel_y)
+
 
     # Update the game state
-    # ...
 
-    velocity = vec(vel_x, vel_y)
-
-    if velocity.length() > 0:
-        player.move(velocity)
-
-    # Update the display
-    setup_background()
-    screen.blit(player.image, player.position)
-
-    for enemy in enemies.sprites():
+    # check for damage
+    for enemy in enemies:
         if enemy.collides_with(player):
             player.take_damage_from(enemy)
 
@@ -104,7 +97,19 @@ while running:
             if enemy.collides_with(weapon):
                 enemy.take_damage_from(weapon)
 
+    # Move the player
+    if player_velocity.length() > 0:
+        player.move(player_velocity)
+
+    # move the enemies
+    for enemy in enemies:
         enemy.pursue(player)
+
+    # Update the display
+    setup_background()
+    screen.blit(player.image, player.position)
+
+    for enemy in enemies:
         screen.blit(enemy.image, enemy.position)
 
     pygame.display.update()

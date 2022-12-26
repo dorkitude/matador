@@ -3,8 +3,6 @@ a simple but addictive 2D python game that mixes bullet hell and a "barely-dodge
 
 maybe you'll feel like a bullfighter?
 
-
-
 # installation
 requires python 3.10+
 

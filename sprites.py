@@ -44,8 +44,6 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
         # print(f"velocity:  {velocity}.  position:  {self.position}.  new_position:  {new_position}")
         self.x = new_position[0]
         self.y = new_position[1]
-        self.rect.x = self.x
-        self.rect.y = self.y
 
         # Keep the sprite within the window boundaries
         if self.x < 0:
@@ -163,6 +161,7 @@ class Player(BaseSprite, Harmable):
 
     def die(self):
         print(f"{self} has died")
+        self.kill()
 
     @property
     def weapons(self):
@@ -171,6 +170,9 @@ class Player(BaseSprite, Harmable):
         return self._weapons
 
 class Enemy(BaseSprite, Harmable, Weapon):
+
+    all_enemies = pygame.sprite.Group()
+    pursuing_enemies = pygame.sprite.Group()
 
     speed = 2
     hit_points = 100
@@ -202,3 +204,4 @@ class Enemy(BaseSprite, Harmable, Weapon):
 
     def die(self):
         print(f"{self} has died")
+        self.kill()

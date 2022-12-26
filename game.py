@@ -29,9 +29,6 @@ player = Player()
 player.x = 100
 player.y = 300
 
-# make the enemies group
-enemies = []
-
 def spawn_enemy():
     print("spawning an enemy")
 
@@ -41,7 +38,8 @@ def spawn_enemy():
         enemy = Enemy()
         enemy.x = random.randint(400,700)
         enemy.y = random.randint(300,500)
-        enemies.append(enemy)
+        Enemy.all_enemies.add(enemy)
+        Enemy.pursuing_enemies.add(enemy)
 
 
 pygame.time.set_timer(EVENT_SPAWNER_COOLDOWN, 5000)
@@ -89,7 +87,7 @@ while running:
     # Update the game state
 
     # check for damage
-    for enemy in enemies:
+    for enemy in Enemy.all_enemies.sprites():
         if enemy.collides_with(player):
             player.take_damage_from(enemy)
 
@@ -102,14 +100,14 @@ while running:
         player.move(player_velocity)
 
     # move the enemies
-    for enemy in enemies:
+    for enemy in Enemy.all_enemies.sprites():
         enemy.pursue(player)
 
     # Update the display
     setup_background()
     screen.blit(player.image, player.position)
 
-    for enemy in enemies:
+    for enemy in Enemy.all_enemies.sprites():
         screen.blit(enemy.image, enemy.position)
 
     pygame.display.update()

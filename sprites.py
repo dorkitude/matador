@@ -1,6 +1,6 @@
 from globals import *
-import random
 from abc import ABC, abstractmethod
+import random
 
 class Foo(object):
     def __init__(self, **kwargs):
@@ -29,7 +29,22 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
     def collides_with(self, sprite): #bool
         return self.rect.colliderect(sprite.rect)
 
-    def move(self, direction):   # void
+    def distance_to(self, sprite): #float
+        return vec(self.rect.center).distance_to(vec(sprite.rect.center))
+
+    def collides_with_any(self, sprite_group): #bool
+        return pygame.sprite.spritecollideany(self, sprite_group)
+
+    def move(self, direction, collision_checks=None):   # void
+        # this is a method that moves the sprite in the direction of the vector
+        # direction.  It will check for collisions with other sprites in the
+        # collision_checks group.  If a collision is detected, the sprite will
+        # attempt to move in the direction of the vector, but will stop before
+        # colliding with the other sprite.
+
+        if not collision_checks:
+            # make in an empty group
+            collision_checks = pygame.sprite.Group()
 
         if direction.length() == 0:
             return
@@ -40,10 +55,62 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
 
         velocity = vec(direction[0]*magnitude, direction[1]*magnitude)
 
-        new_position = vec(self.x, self.y) + vec(velocity)
-        # print(f"velocity:  {velocity}.  position:  {self.position}.  new_position:  {new_position}")
-        self.x = new_position[0]
-        self.y = new_position[1]
+        old_position = vec(self.x, self.y)
+        preferred_destination = old_position + vec(velocity)
+
+        # relocate the sprite
+        self.x = preferred_destination[0]
+        self.y = preferred_destination[1]
+
+        # use an approximated binary search to get as close as possible to the destination
+        # without colliding with the other sprites
+
+        if self.collides_with_any(collision_checks):
+            print(f"{self.id} is doing collision checks")
+            print(f"preffered destination: {preferred_destination}")
+            print(f"old position: {old_position}")
+            print(f"Collision detected at {self.x}, {self.y}")
+            # check 90% of the way
+            self.x = old_position[0] + 0.9 * (self.x - old_position[0])
+            self.y = old_position[1] + 0.9 * (self.y - old_position[1])
+            print(f"checking {self.x}, {self.y}...")
+
+        if self.collides_with_any(collision_checks):
+            print(f"Collision detected at {self.x}, {self.y}")
+            # check 80%
+            self.x = old_position[0] + 0.8 * (self.x - old_position[0])
+            self.y = old_position[1] + 0.8 * (self.y - old_position[1])
+            print(f"checking {self.x}, {self.y}...")
+
+        if self.collides_with_any(collision_checks):
+            print(f"Collision detected at {self.x}, {self.y}")
+            # check 70% of the way to the destination
+            self.x = old_position[0] + 0.7 * (self.x - old_position[0])
+            self.y = old_position[1] + 0.7 * (self.y - old_position[1])
+            print(f"checking {self.x}, {self.y}...")
+
+        if self.collides_with_any(collision_checks):
+            print(f"Collision detected at {self.x}, {self.y}")
+            # check 50% of the way to the destination
+            self.x = old_position[0] + 0.5 * (self.x - old_position[0])
+            self.y = old_position[1] + 0.5 * (self.y - old_position[1])
+            print(f"checking {self.x}, {self.y}...")
+
+        if self.collides_with_any(collision_checks):
+            print(f"Collision detected at {self.x}, {self.y}")
+            # check 20% of the way to the destination
+            self.x = old_position[0] + 0.2 * (self.x - old_position[0])
+            self.y = old_position[1] + 0.2 * (self.y - old_position[1])
+            print(f"checking {self.x}, {self.y}...")
+
+        if self.collides_with_any(collision_checks):
+            print(f"can't move at all")
+            # if we still collide, then we can't move at all
+            self.x = old_position[0]
+            self.y = old_position[1]
+            return None
+
+
 
         # Keep the sprite within the window boundaries
         if self.x < 0:
@@ -55,10 +122,6 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
         if self.y + self.height > window_size[1]:
             self.y = window_size[1] - self.height
 
-    def move_toward(self, destination):
-        direction = vec((destination[0]-self.x, destination[1]-self.y))
-        # print(f"direction = {direction}")
-        self.move(direction)
 
     @property
     def position(self):
@@ -147,9 +210,10 @@ class Weapon(ABC):
 
 class Player(BaseSprite, Harmable):
 
+    # default values
     hit_points = 100
     speed = 5
-    _weapons = None
+    _weapons = None # this will get set the first time the instance property is accessed
 
     def __init__(self):
         super().__init__()
@@ -157,7 +221,7 @@ class Player(BaseSprite, Harmable):
         self.rect = self.image.get_rect()
 
     def __str__(self):
-        return f"The Player {self.id}"
+        return f"Player {self.id}"
 
     def die(self):
         print(f"{self} has died")
@@ -172,6 +236,7 @@ class Player(BaseSprite, Harmable):
 class Enemy(BaseSprite, Harmable, Weapon):
 
     all_enemies = pygame.sprite.Group()
+    resolved_enemies = pygame.sprite.Group()
     pursuing_enemies = pygame.sprite.Group()
 
     speed = 2
@@ -200,8 +265,9 @@ class Enemy(BaseSprite, Harmable, Weapon):
     def pursue(self, sprite):
         destination_x = sprite.position[0] + random.randint(1,sprite.width)
         destination_y = sprite.position[1] + random.randint(1,sprite.height)
-        self.move_toward((destination_x, destination_y))
+        direction = vec((destination_x-self.x, destination_y-self.y))
+        self.move(direction, Enemy.resolved_enemies)
 
     def die(self):
         print(f"{self} has died")
-        self.kill()
+        self.kill()  # TODO:  figure out how to

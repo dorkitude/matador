@@ -1,7 +1,6 @@
 import sys
 import random
 import itertools
-from time import sleep
 from math import ceil
 from globals import *
 from sprites import Player, Enemy
@@ -41,7 +40,7 @@ def spawn_enemy():
         Enemy.all_enemies.add(enemy)
         Enemy.pursuing_enemies.add(enemy)
 
-
+# this schedules a reccurring event
 pygame.time.set_timer(EVENT_SPAWNER_COOLDOWN, 5000)
 
 spawn_enemy()
@@ -83,7 +82,6 @@ while running:
 
     player_velocity = vec(vel_x, vel_y)
 
-
     # Update the game state
 
     # check for damage
@@ -99,9 +97,18 @@ while running:
     if player_velocity.length() > 0:
         player.move(player_velocity)
 
+    all_enemies = Enemy.all_enemies.sprites()
+
+    # sort the enemies by distance to the player
+    all_enemies = sorted(all_enemies, key=lambda enemy: enemy.distance_to(player))
+
+    # make a group of enemies whose movement is resolved
+    Enemy.resolved_enemies = pygame.sprite.Group()
+
     # move the enemies
-    for enemy in Enemy.all_enemies.sprites():
+    for enemy in all_enemies:
         enemy.pursue(player)
+        Enemy.resolved_enemies.add(enemy)
 
     # Update the display
     setup_background()
@@ -111,6 +118,8 @@ while running:
         screen.blit(enemy.image, enemy.position)
 
     pygame.display.update()
+
+    Enemy.resolved_enemies.empty()
 
     # Wait for the next frame
     pygame.time.delay(frame_duration)

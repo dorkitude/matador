@@ -3,7 +3,7 @@ import random
 import itertools
 from math import ceil
 from globals import *
-from sprites import Player, Enemy
+from sprites import Player, Enemy, Weapon, Halo
 
 # Initialize Pygame
 pygame.init()
@@ -27,6 +27,11 @@ def setup_background():
 player = Player()
 player.x = 100
 player.y = 250
+
+# make the "garlic" halo
+halo = Halo(player, STARTING_HALO_RADIUS)
+
+
 
 def spawn_enemy():
 
@@ -95,8 +100,8 @@ while running:
         if enemy.collides_with(player):
             player.take_damage_from(enemy)
 
-        for weapon in player.weapons:
-            if enemy.collides_with(weapon):
+        for weapon in Weapon.all_weapons.sprites():
+            if weapon.collides_with(enemy):
                 enemy.take_damage_from(weapon)
 
     # Move the player
@@ -118,6 +123,10 @@ while running:
 
     # Update the display
     setup_background()
+
+    for weapon in Weapon.all_weapons.sprites():
+        screen.blit(weapon.image, weapon.position)
+
     screen.blit(player.image, player.position)
 
     for enemy in Enemy.all_enemies.sprites():

@@ -18,6 +18,8 @@ COUNT = 0
 PLAYER_BASE_SPEED = 7
 SPEED_MODIFIER = 0.05
 
+STARTING_HALO_RADIUS = 50
+
 # seconds between each spawn
 GLOBAL_SPAWN_RATE = 3
 

@@ -140,6 +140,7 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
     def x(self, value):
         self._x = value
         self.rect.x = value
+        self.after_move()
 
     @property
     def y(self):
@@ -149,13 +150,20 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
     def y(self, value):
         self._y = value
         self.rect.y = value
+        self.after_move()
+
+    def after_move(self):
+        pass
+
 class Harmable(ABC):
     # This is a mixin that handles hit points and damage
 
     def take_damage_from(self, weapon):
 
         if weapon.is_damage_cooldown_expired(self):
-            self.hit_points -= weapon.damage
+            # randomize damage by 12% in either direction
+            real_damage = int(weapon.damage * (1 + random.uniform(-0.12, 0.12)))
+            self.hit_points -= real_damage
             weapon.start_cooldown_timer(self)
             print(f"{self} is taking {weapon.damage} damage from {weapon} and now has {self.hit_points} hit_points")
             if self.hit_points <= 0:
@@ -169,6 +177,9 @@ class Harmable(ABC):
         pass
 
 class Weapon(ABC):
+
+    all_weapons = pygame.sprite.Group()
+
     # This is a mixin that handles anything that can deal damage
 
     # this is the amount of damage to take
@@ -218,6 +229,7 @@ class Player(BaseSprite, Harmable):
     hit_points = 100
     speed = PLAYER_BASE_SPEED
     _weapons = None # this will get set the first time the instance property is accessed
+    halo = None
 
     def __init__(self):
         super().__init__()
@@ -237,6 +249,31 @@ class Player(BaseSprite, Harmable):
             self._weapons = pygame.sprite.Group()
         return self._weapons
 
+    def after_move(self):
+        if self.halo:
+            self.halo.x = (self.x + self.width/2) - self.halo.radius
+            self.halo.y = (self.y + self.height/2) - self.halo.radius
+
+class Halo(BaseSprite, Weapon):
+
+    damage = 10
+
+    def __init__(self, player, radius):
+        super().__init__()
+        Weapon.all_weapons.add(self)
+
+        self.image = pygame.Surface((radius*2, radius*2))
+        self.rect = self.image.get_rect()
+        self.radius = radius
+        pygame.draw.circle(self.image, (255, 255, 255, 128), (radius, radius), radius)
+        player.halo = self
+        player.after_move()
+
+    def __str__(self):
+        return f"Halo {self.id}"
+
+
+
 class Enemy(BaseSprite, Harmable, Weapon):
 
     all_enemies = pygame.sprite.Group()
@@ -244,7 +281,7 @@ class Enemy(BaseSprite, Harmable, Weapon):
     pursuing_enemies = pygame.sprite.Group()
 
     speed = 2
-    hit_points = 100
+    hit_points = 10
     _damage = 1
 
     def __init__(self):
@@ -276,4 +313,6 @@ class Enemy(BaseSprite, Harmable, Weapon):
 
     def die(self):
         print(f"{self} has died")
+        print(len(Enemy.all_enemies.sprites()))
         self.kill()  # TODO:  figure out how to
+        print(len(Enemy.all_enemies.sprites()))

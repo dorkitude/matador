@@ -117,7 +117,6 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
             self.y = old_position[1]
             return None
 
-
         print(f"successfully moved to {self.x}, {self.y}")
 
         # Keep the sprite within the window boundaries
@@ -167,15 +166,12 @@ class Harmable(ABC):
             # print(f"{weapon} cannot hurt {self} because it's on cooldown!")
             return
 
-
     @abstractmethod
     def die(self):
         pass
 
 class Weapon(ABC):
     # This is a mixin that handles anything that can deal damage
-
-
 
     # this is the amount of damage to take
     @property
@@ -184,13 +180,15 @@ class Weapon(ABC):
 
     # Cooldown logic.
     # ----------------------------------------------------
-    # A weapon should only be able to hurt a given Harmable once ever X milliseconds.
+    # A weapon should only be able to hurt a given Harmable once every X milliseconds.
     # That 'X' is called a cooldown.
     damage_cooldown = 1200  # milliseconds
     last_recorded_damage = None
 
     def is_damage_cooldown_expired(self, target):
-        # target is a Harmable
+        # make sure target is a Harmable
+        if not isinstance(target, Harmable):
+            raise TypeError(f"target must be a Harmable, not a {type(target)}")
 
         # Check to see if enough time has ellapsed since we last hit this target.
         elapsed = now() - self.get_last_damage_time(target)
@@ -262,6 +260,8 @@ class Enemy(BaseSprite, Harmable, Weapon):
             self._damage = 3
             self.image = pygame.image.load("sprites/skull_v1_4.png").convert()
         self.rect = self.image.get_rect()
+
+        Enemy.all_enemies.add(self)
 
     @property
     def damage(self):

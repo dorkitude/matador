@@ -84,24 +84,31 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
 
         if self.collides_with_any(collision_checks):
             print(f"Collision detected at {self.x}, {self.y}")
-            # check 70% of the way to the destination
-            self.x = old_position[0] + 0.7 * (self.x - old_position[0])
-            self.y = old_position[1] + 0.7 * (self.y - old_position[1])
-            print(f"checking {self.x}, {self.y}...")
-
-        if self.collides_with_any(collision_checks):
-            print(f"Collision detected at {self.x}, {self.y}")
-            # check 50% of the way to the destination
-            self.x = old_position[0] + 0.5 * (self.x - old_position[0])
-            self.y = old_position[1] + 0.5 * (self.y - old_position[1])
-            print(f"checking {self.x}, {self.y}...")
-
-        if self.collides_with_any(collision_checks):
-            print(f"Collision detected at {self.x}, {self.y}")
             # check 20% of the way to the destination
             self.x = old_position[0] + 0.2 * (self.x - old_position[0])
             self.y = old_position[1] + 0.2 * (self.y - old_position[1])
             print(f"checking {self.x}, {self.y}...")
+
+        if self.collides_with_any(collision_checks):
+            print(f"Collision detected at {self.x}, {self.y}")
+            print(f"Gonna try rotating my motion vector counter-clockwise 90 degrees")
+            # try pathfinding by moving orthogonal to the velocity vector
+            orthogonal_vector = velocity.rotate(90)
+            print(f"original velocity: {velocity}, orthogonal vector: {orthogonal_vector}")
+            orthogonal_destination = old_position + orthogonal_vector
+            print(f"instead of preffered destination: {preferred_destination}, I'm going to try {orthogonal_destination}")
+            self.x = orthogonal_destination[0]
+            self.y = orthogonal_destination[1]
+
+        if self.collides_with_any(collision_checks):
+            print(f"Collision detected at {self.x}, {self.y}")
+            print(f"Gonna try rotating my motion vector clockwise")
+            # try pathfinding by moving in the *opposite* orthogonal direction
+            orthogonal_vector = velocity.rotate(-90)
+            print(f"original velocity: {velocity}, orthogonal vector: {orthogonal_vector}")
+            orthogonal_destination = old_position + orthogonal_vector
+            self.x = orthogonal_destination[0]
+            self.y = orthogonal_destination[1]
 
         if self.collides_with_any(collision_checks):
             print(f"can't move at all")
@@ -111,6 +118,7 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
             return None
 
 
+        print(f"successfully moved to {self.x}, {self.y}")
 
         # Keep the sprite within the window boundaries
         if self.x < 0:

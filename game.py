@@ -41,7 +41,7 @@ def spawn_enemy():
         Enemy.pursuing_enemies.add(enemy)
 
 # this schedules a reccurring event
-pygame.time.set_timer(EVENT_SPAWNER_COOLDOWN, 5000)
+pygame.time.set_timer(EVENT_SPAWNER_COOLDOWN, ceil(1000*GLOBAL_SPAWN_RATE))
 
 spawn_enemy()
 # Run the game loop

@@ -15,6 +15,9 @@ COUNT = 0
 
 SPEED_MODIFIER = 0.05
 
+# seconds between each spawn
+GLOBAL_SPAWN_RATE = 3
+
 # Set the frame rate
 frame_rate = 60
 frame_duration = int(1000 / frame_rate)
@@ -24,3 +27,7 @@ window_size = (800, 600)
 
 #  events
 EVENT_SPAWNER_COOLDOWN = pygame.USEREVENT + 1
+
+
+def log(x):
+  print(x)

@@ -26,17 +26,23 @@ def setup_background():
 # make the player
 player = Player()
 player.x = 100
-player.y = 300
+player.y = 250
 
 def spawn_enemy():
-    print("spawning an enemy")
 
     spawn_count = random.randint(1,3)
 
+    seconds_since_launch = now() - start_time
+
+    # for every 5 seconds since launch, increase the spawn rate by 1
+    spawn_count += int(seconds_since_launch / 5000)
+
+    print(f"spawning {spawn_count} enemies")
+
     for i in range(spawn_count):
         enemy = Enemy()
-        enemy.x = random.randint(400,700)
-        enemy.y = random.randint(300,500)
+        enemy.x = random.randint(600,700)
+        enemy.y = random.randint(100,500)
         Enemy.all_enemies.add(enemy)
         Enemy.pursuing_enemies.add(enemy)
 

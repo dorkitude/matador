@@ -216,7 +216,7 @@ class Player(BaseSprite, Harmable):
 
     # default values
     hit_points = 100
-    speed = 5
+    speed = PLAYER_BASE_SPEED
     _weapons = None # this will get set the first time the instance property is accessed
 
     def __init__(self):

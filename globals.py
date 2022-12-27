@@ -3,6 +3,8 @@ import pygame
 def now():
   return pygame.time.get_ticks()
 
+start_time = now()
+
 # Declaring variables to be used through the program
 vec = pygame.math.Vector2
 HEIGHT = 350
@@ -13,6 +15,7 @@ FPS = 60
 FPS_CLOCK = pygame.time.Clock()
 COUNT = 0
 
+PLAYER_BASE_SPEED = 7
 SPEED_MODIFIER = 0.05
 
 # seconds between each spawn

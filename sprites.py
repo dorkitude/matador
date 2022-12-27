@@ -233,7 +233,7 @@ class Player(BaseSprite, Harmable):
 
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("sprites/adventurer-idle-02.png").convert()
+        self.image = pygame.image.load("sprites/matador.png").convert()
         self.rect = self.image.get_rect()
 
     def __str__(self):

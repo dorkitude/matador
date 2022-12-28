@@ -50,15 +50,21 @@ def spawn_enemy():
         # try not to let this enemy overlap with any others
         placement_tries = 10
         tries_attempted = 0
+        skip_this_enemy = False
         while tries_attempted < placement_tries and enemy.collides_with_any(Enemy.all_enemies):
             tries_attempted += 1
             print(f"attempt {tries_attempted} collided: {enemy.collides_with_any(Enemy.all_enemies).rect}")
             enemy.x = random.randint(zone_topleft[0], zone_bottomright[0])
             enemy.y = random.randint(zone_topleft[1], zone_bottomright[1])
+            if tries_attempted == placement_tries:
+                skip_this_enemy = True
 
-        # print(f"spawned an enemy at ({enemy.x}, {enemy.y})")
-        Enemy.all_enemies.add(enemy)
-        Enemy.pursuing_enemies.add(enemy)
+        if skip_this_enemy:
+            enemy.kill()
+            continue
+        else:
+            Enemy.all_enemies.add(enemy)
+            Enemy.pursuing_enemies.add(enemy)
 
 # this schedules a reccurring event to spawn enemies
 pygame.time.set_timer(EVENT_SPAWNER_COOLDOWN, ceil(1000*GLOBAL_SPAWN_RATE))

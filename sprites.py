@@ -61,53 +61,26 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
         self.x = preferred_destination[0]
         self.y = preferred_destination[1]
 
-        # use an approximated binary search to get as close as possible to the destination
-        # without colliding with the other sprites
-
         if self.collides_with_any(collision_checks):
-            # print(f"{self.id} is doing collision checks")
-            # print(f"preffered destination: {preferred_destination}")
-            # print(f"old position: {old_position}")
-            # print(f"Collision detected at {self.x}, {self.y}")
-            # check 90% of the way
             self.x = old_position[0] + 0.9 * (self.x - old_position[0])
             self.y = old_position[1] + 0.9 * (self.y - old_position[1])
-            # print(f"checking {self.x}, {self.y}...")
 
         if self.collides_with_any(collision_checks):
-            # print(f"Collision detected at {self.x}, {self.y}")
-            # check 80%
             self.x = old_position[0] + 0.8 * (self.x - old_position[0])
             self.y = old_position[1] + 0.8 * (self.y - old_position[1])
-            # print(f"checking {self.x}, {self.y}...")
 
-        if self.collides_with_any(collision_checks):
-            # print(f"Collision detected at {self.x}, {self.y}")
-            # check 20% of the way to the destination
-            self.x = old_position[0] + 0.2 * (self.x - old_position[0])
-            self.y = old_position[1] + 0.2 * (self.y - old_position[1])
-            # print(f"checking {self.x}, {self.y}...")
+        rotation_angles = [15, 30, 45, 60, 75, 90, -15, -30, -45, -60, -75, -90, 180]
 
-        if self.collides_with_any(collision_checks):
-            # print(f"Collision detected at {self.x}, {self.y}")
-            # print(f"Gonna try rotating my motion vector counter-clockwise 90 degrees")
-            # try pathfinding by moving orthogonal to the velocity vector
-            orthogonal_vector = velocity.rotate(90)
-            # print(f"original velocity: {velocity}, orthogonal vector: {orthogonal_vector}")
-            orthogonal_destination = old_position + orthogonal_vector
-            # print(f"instead of preffered destination: {preferred_destination}, I'm going to try {orthogonal_destination}")
-            self.x = orthogonal_destination[0]
-            self.y = orthogonal_destination[1]
-
-        if self.collides_with_any(collision_checks):
-            # print(f"Collision detected at {self.x}, {self.y}")
-            # print(f"Gonna try rotating my motion vector clockwise")
-            # try pathfinding by moving in the *opposite* orthogonal direction
-            orthogonal_vector = velocity.rotate(-90)
-            # print(f"original velocity: {velocity}, orthogonal vector: {orthogonal_vector}")
-            orthogonal_destination = old_position + orthogonal_vector
-            self.x = orthogonal_destination[0]
-            self.y = orthogonal_destination[1]
+        for angle in rotation_angles:
+            if self.collides_with_any(collision_checks):
+                rotated_vector = velocity.rotate(angle)
+                attempted_destination = old_position + rotated_vector
+                self.x = attempted_destination[0]
+                self.y = attempted_destination[1]
+                # if not self.collides_with_any(collision_checks):
+                    # print(f"rotating by {angle}º worked!")
+            else:
+                break
 
         if self.collides_with_any(collision_checks):
             # print(f"can't move at all")

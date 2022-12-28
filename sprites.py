@@ -163,9 +163,16 @@ class Harmable(ABC):
         if weapon.is_damage_cooldown_expired(self):
             # randomize damage by 12% in either direction
             real_damage = int(weapon.damage * (1 + random.uniform(-0.12, 0.12)))
+            # print(f"real_damage = {real_damage}")
             self.hit_points -= real_damage
             weapon.start_cooldown_timer(self)
-            print(f"{self} is taking {weapon.damage} damage from {weapon} and now has {self.hit_points} hit_points")
+            # print(f"{self} took {real_damage} damage from {weapon}, {self.hit_points} HP remaining")
+
+            # TODO:  make the sprite blink
+
+            # TODO:  calculate and perform a bounce-back, based on the weapon (Player is immune)
+
+            # TODO:  report damage via floating text
             if self.hit_points <= 0:
                 self.die()
         else:
@@ -296,8 +303,6 @@ class Enemy(BaseSprite, Harmable, Weapon):
             self.image = pygame.image.load("sprites/skull_v1_4.png").convert()
         self.rect = self.image.get_rect()
 
-        Enemy.all_enemies.add(self)
-
     @property
     def damage(self):
         return self._damage
@@ -313,6 +318,4 @@ class Enemy(BaseSprite, Harmable, Weapon):
 
     def die(self):
         print(f"{self} has died")
-        print(len(Enemy.all_enemies.sprites()))
-        self.kill()  # TODO:  figure out how to
-        print(len(Enemy.all_enemies.sprites()))
+        self.kill()

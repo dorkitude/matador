@@ -4,6 +4,7 @@ import itertools
 from math import ceil
 from globals import *
 from sprites import Player, Enemy, Weapon, Halo
+import ui
 
 # Initialize Pygame
 pygame.init()
@@ -19,7 +20,7 @@ def setup_background():
     tile = pygame.image.load("sprites/desert_tile.png")
     brick_width = tile.get_width()
     brick_height = tile.get_height()
-    for x,y in itertools.product(range(0,ceil(800/brick_width)), range(0,ceil(600/brick_height))):
+    for x,y in itertools.product(range(0,ceil(window_size[0]/brick_width)), range(0,ceil(window_size[1]/brick_height))):
         screen.blit(tile, (x*brick_width, y*brick_height))
 
 
@@ -28,34 +29,43 @@ player = Player()
 player.x = 100
 player.y = 250
 
-# make the "garlic" halo
+# make the starting weapon
 halo = Halo(player, STARTING_HALO_RADIUS)
 
-
-
 def spawn_enemy():
-
+    # Ramp:  every 5 seconds since launch, increase the spawn rate
     spawn_count = random.randint(1,3)
-
     seconds_since_launch = now() - start_time
+    spawn_count += 2*int(seconds_since_launch / 5000)
 
-    # for every 5 seconds since launch, increase the spawn rate by 1
-    spawn_count += int(seconds_since_launch / 5000)
-
-    print(f"spawning {spawn_count} enemies")
+    # print(f"spawning {spawn_count} enemies")
+    zone_topleft = (750, 50)
+    zone_bottomright = (950, 700)
 
     for i in range(spawn_count):
         enemy = Enemy()
-        enemy.x = random.randint(600,700)
-        enemy.y = random.randint(100,500)
+        enemy.x = random.randint(zone_topleft[0], zone_bottomright[0])
+        enemy.y = random.randint(zone_topleft[1], zone_bottomright[1])
+
+        # try not to let this enemy overlap with any others
+        placement_tries = 10
+        tries_attempted = 0
+        while tries_attempted < placement_tries and enemy.collides_with_any(Enemy.all_enemies):
+            tries_attempted += 1
+            print(f"attempt {tries_attempted} collided: {enemy.collides_with_any(Enemy.all_enemies).rect}")
+            enemy.x = random.randint(zone_topleft[0], zone_bottomright[0])
+            enemy.y = random.randint(zone_topleft[1], zone_bottomright[1])
+
+        # print(f"spawned an enemy at ({enemy.x}, {enemy.y})")
         Enemy.all_enemies.add(enemy)
         Enemy.pursuing_enemies.add(enemy)
 
-# this schedules a reccurring event
+# this schedules a reccurring event to spawn enemies
 pygame.time.set_timer(EVENT_SPAWNER_COOLDOWN, ceil(1000*GLOBAL_SPAWN_RATE))
 
 spawn_enemy()
 # Run the game loop
+
 running = True
 while running:
 
@@ -121,9 +131,17 @@ while running:
         enemy.pursue(player)
         Enemy.resolved_enemies.add(enemy)
 
+    # -------------------
     # Update the display
+    # -------------------
+
+    # show/update player HP bar in top-peft
+    ui.render_player_stats(player)
+
+    # first, handle map and background stuff
     setup_background()
 
+    # next, render floor-level stuff
     for weapon in Weapon.all_weapons.sprites():
         screen.blit(weapon.image, weapon.position)
 

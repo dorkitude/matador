@@ -9,6 +9,7 @@ class Foo(object):
 class BaseSprite(pygame.sprite.Sprite, ABC):
     _width = None
     _height = None
+    stunned_until_time = None
 
     @property
     def id(self):
@@ -35,7 +36,24 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
     def collides_with_any(self, sprite_group): #bool
         return pygame.sprite.spritecollideany(self, sprite_group)
 
-    def move(self, direction, collision_checks=None):   # void
+    def is_stunned(self):
+        if self.stunned_until_time is None:
+            return False
+
+        if now() > self.stunned_until_time:
+            self.stunned_until_time = None
+            return False
+
+        return True
+
+    def stun(self, duration):
+        # This method will prevent the sprite from moving for the specified duration
+        self.stunned_until_time = now() + duration
+
+    def move(self, direction, collision_checks=None, speed_scalar=1):   # void
+        if self.is_stunned():
+            return
+
         # this is a method that moves the sprite in the direction of the vector
         # It will check for collisions with other sprites in the collision_checks
         # group.  If a collision is detected, the sprite will attempt to move in
@@ -50,7 +68,7 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
 
         # Normalize the direction vector, so we have have a vector of length 1
         direction = direction.normalize()
-        magnitude = self.speed * SPEED_MODIFIER * frame_duration
+        magnitude = self.speed * speed_scalar * SPEED_MODIFIER * frame_duration
 
         velocity = vec(direction[0]*magnitude, direction[1]*magnitude)
 
@@ -136,14 +154,21 @@ class Harmable(ABC):
         if weapon.is_damage_cooldown_expired(self):
             # randomize damage by 12% in either direction
             real_damage = int(weapon.damage * (1 + random.uniform(-0.12, 0.12)))
-            # print(f"real_damage = {real_damage}")
             self.hit_points -= real_damage
             weapon.start_cooldown_timer(self)
+
             # print(f"{self} took {real_damage} damage from {weapon}, {self.hit_points} HP remaining")
 
             # TODO:  make the sprite blink
 
-            # TODO:  calculate and perform a bounce-back, based on the weapon (Player is immune)
+            # calculate and perform a knockback, based on the weapon (Player is immune)
+            if not isinstance(self, Player):
+                print(f"{self} is bouncing back from {weapon}")
+                knockback_vector = vec(self.rect.center) - vec(weapon.rect.center)
+                knockback_vector = knockback_vector.normalize()
+                self.move(knockback_vector, speed_scalar=12)
+                self.stun(200)
+
 
             # TODO:  report damage via floating text
             if self.hit_points <= 0:

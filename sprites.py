@@ -3,6 +3,11 @@ from abc import ABC, abstractmethod
 import random
 from base_sprites import BaseSprite, BaseCharacter
 
+
+sprites_to_render_first = pygame.sprite.Group()
+sprites_to_render_second = pygame.sprite.Group()
+sprites_to_render_third = pygame.sprite.Group()
+
 class Foo(object):
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -20,14 +25,12 @@ class Harmable(ABC):
 
             # print(f"{self} took {real_damage} damage from {weapon}, {self.hit_points} HP remaining")
 
-            # TODO make the sprite blink
-
             # calculate and perform a knockback, based on the weapon (Player is immune)
             if not isinstance(self, Player):
                 # print(f"{self} is bouncing back from {weapon}")
                 knockback_vector = vec(self.rect.center) - vec(weapon.rect.center)
                 knockback_vector = knockback_vector.normalize()
-                self.move(knockback_vector, speed_scalar=12)
+                self.move(knockback_vector, speed_scalar=13)
                 self.stun(200)
 
             # make some text appear above the sprite that shows how much damage it took
@@ -98,6 +101,7 @@ class Player(BaseCharacter, Harmable):
     speed = PLAYER_BASE_SPEED
     _weapons = None # this will get set the first time the instance property is accessed
     halo = None
+    status = None
 
     def __init__(self):
         super().__init__()
@@ -144,6 +148,7 @@ class Halo(BaseSprite, Weapon):
 
 class Enemy(BaseCharacter, Harmable, Weapon):
 
+    default_status = "pursuing"
     all_enemies = pygame.sprite.Group()
     resolved_enemies = pygame.sprite.Group()
     pursuing_enemies = pygame.sprite.Group()
@@ -155,7 +160,9 @@ class Enemy(BaseCharacter, Harmable, Weapon):
     def __init__(self):
         super().__init__()
 
-        if random.randint(1,10) > 2:
+        self.status = self.default_status
+
+        if random.randint(1,10) > 9:
             self.hit_points = 5
             self.image = pygame.image.load("sprites/lizard_f_idle_anim_f3.png").convert_alpha()
         else:

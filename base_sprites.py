@@ -5,8 +5,6 @@ from abc import ABC, abstractmethod
 class BaseSprite(pygame.sprite.Sprite, ABC):
     _width = None
     _height = None
-    stunned_until_time = None
-    animation = None
 
     @property
     def id(self):
@@ -24,37 +22,32 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
             self._height = self.image.get_height()
         return self._height
 
-    def is_animating(self):
-        return self.animation is not None
+    @property
+    def position(self):
+        return (self.x, self.y)
 
-    def render(self, screen):
-        if self.is_animating():
-            self.animation.render(screen)
-        else:
-            screen.blit(self.image, self.rect)
+    @property
+    def x(self):
+        return self._x
 
-    def collides_with(self, sprite): #bool
-        return self.rect.colliderect(sprite.rect)
+    @x.setter
+    def x(self, value):
+        self._x = value
+        self.rect.x = value
+        self.after_move()
+
+    @property
+    def y(self):
+        return self._y
+
+    @y.setter
+    def y(self, value):
+        self._y = value
+        self.rect.y = value
+        self.after_move()
 
     def distance_to(self, sprite): #float
         return vec(self.rect.center).distance_to(vec(sprite.rect.center))
-
-    def collides_with_any(self, sprite_group): #bool
-        return pygame.sprite.spritecollideany(self, sprite_group)
-
-    def is_stunned(self):
-        if self.stunned_until_time is None:
-            return False
-
-        if now() > self.stunned_until_time:
-            self.stunned_until_time = None
-            return False
-
-        return True
-
-    def stun(self, duration):
-        # This method will prevent the sprite from moving for the specified duration
-        self.stunned_until_time = now() + duration
 
     def move(self, direction, collision_checks=None, speed_scalar=1):   # void
         if self.is_stunned():
@@ -125,33 +118,62 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
         if self.y + self.height > window_size[1]:
             self.y = window_size[1] - self.height
 
-    @property
-    def position(self):
-        return (self.x, self.y)
-
-    @property
-    def x(self):
-        return self._x
-
-    @x.setter
-    def x(self, value):
-        self._x = value
-        self.rect.x = value
-        self.after_move()
-
-    @property
-    def y(self):
-        return self._y
-
-    @y.setter
-    def y(self, value):
-        self._y = value
-        self.rect.y = value
-        self.after_move()
+    def render(self, screen):
+        screen.blit(self.image, self.rect)
 
     def after_move(self):
         pass
 
+    def collides_with(self, sprite): #bool
+        return self.rect.colliderect(sprite.rect)
+
+    def collides_with_any(self, sprite_group): #bool
+        return pygame.sprite.spritecollideany(self, sprite_group)
+
 
 class BaseCharacter(BaseSprite, ABC):
-    pass
+
+    stunned_until_time = None
+    stun_sequence = None
+
+    def render(self, screen):
+        if self.is_stunned():
+            print(f"{self} is stunned")
+            # Increment the stun sequence counter
+            self.stun_sequence += 1
+
+            # If the counter has reached a certain value, reset it to 0
+            if self.stun_sequence >= 10:
+                self.stun_sequence = 0
+
+            # Draw the enemy with alpha blending
+            alphas = [0, 200, 0, 200, 0, 200, 0, 200, 0, 200]
+            alpha = alphas[self.stun_sequence]
+            light_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            light_surface.fill((255, 255, 255, alpha))
+            screen.blit(self.image, self.rect)
+            screen.blit(light_surface, self.rect)
+        else:
+            screen.blit(self.image, self.rect)
+
+    def is_stunned(self):
+        if self.status == "stunned":
+            if self.stunned_until_time is None:
+                self.status = self.default_status
+                return False
+            elif now() > self.stunned_until_time:
+                self.stunned_until_time = None
+                self.status = self.default_status
+                return False
+            else:
+                return True
+        else:
+            return False
+
+    def stun(self, duration):
+        # This method will prevent the sprite from moving for the specified duration
+        self.status = "stunned"
+        instant = now()
+        self.stunned_until_time = instant + duration
+        self.stun_start_time = instant
+        self.stun_sequence = 0

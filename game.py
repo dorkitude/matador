@@ -3,7 +3,7 @@ import random
 import itertools
 from math import ceil
 from globals import *
-from sprites import Player, Enemy, Weapon, Halo
+from sprites import Player, Enemy, Weapon, Halo, sprites_to_render_first, sprites_to_render_second, sprites_to_render_third
 import ui
 
 # Initialize Pygame
@@ -28,9 +28,11 @@ def setup_background():
 player = Player()
 player.x = 100
 player.y = 250
+sprites_to_render_second.add(player)
 
 # make the starting weapon
 halo = Halo(player, STARTING_HALO_RADIUS)
+sprites_to_render_first.add(halo)
 
 def spawn_enemy():
     # Ramp:  every 5 seconds since launch, increase the spawn rate
@@ -63,6 +65,7 @@ def spawn_enemy():
             enemy.kill()
             continue
         else:
+            sprites_to_render_third.add(enemy)
             Enemy.all_enemies.add(enemy)
             Enemy.pursuing_enemies.add(enemy)
 
@@ -148,14 +151,22 @@ while running:
     setup_background()
 
     # next, render floor-level stuff
+    for sprite in sprites_to_render_first:
+        sprite.render(screen)
 
-    for weapon in Weapon.all_weapons.sprites():
-        weapon.render(screen)
+    for sprite in sprites_to_render_second:
+        sprite.render(screen)
 
-    player.render(screen)
+    for sprite in sprites_to_render_third:
+        sprite.render(screen)
 
-    for enemy in Enemy.all_enemies.sprites():
-        enemy.render(screen)
+    # for weapon in Weapon.all_weapons.sprites():
+    #     weapon.render(screen)
+
+    # player.render(screen)
+
+    # for enemy in Enemy.all_enemies.sprites():
+    #     enemy.render(screen)
 
     pygame.display.update()
 

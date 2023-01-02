@@ -8,6 +8,7 @@ from text_sprite import TextSprite
 sprites_to_render_first = pygame.sprite.Group()
 sprites_to_render_second = pygame.sprite.Group()
 sprites_to_render_third = pygame.sprite.Group()
+sprites_to_render_fourth = pygame.sprite.Group()
 
 class Foo(object):
     def __init__(self, **kwargs):
@@ -15,6 +16,8 @@ class Foo(object):
 
 class Harmable(ABC):
     # This is a mixin that handles hit points and damage
+
+    damage_alert_color = WHITE
 
     def get_knockback_vector(self, weapon):
         knockback_vector = vec(self.rect.center) - vec(weapon.rect.center)
@@ -39,10 +42,10 @@ class Harmable(ABC):
                 text=str(real_damage),
                 position=(self.rect.midtop[0] + 8, self.rect.midtop[1] - 30),
                 font_size=36,
-                color=RED,
-                dissolve_after=500,
+                color=self.damage_alert_color,
+                dissolve_timer=500,
             )
-            sprites_to_render_third.add(damage_alert)
+            sprites_to_render_fourth.add(damage_alert)
 
             # if the sprite has no hit points left, kill it
             if self.hit_points <= 0:
@@ -120,7 +123,7 @@ class Player(BaseCharacter, Harmable):
         return f"Player {self.id}"
 
     def die(self):
-        # print(f"{self} has died")
+        print(f"{self} has died")
         self.kill()
 
     @property
@@ -160,6 +163,9 @@ class Enemy(BaseCharacter, Harmable, Weapon):
     all_enemies = pygame.sprite.Group()
     resolved_enemies = pygame.sprite.Group()
     pursuing_enemies = pygame.sprite.Group()
+    death_sequence_duration = 1000
+    stunned_until_time = None
+    stun_sequence = None
 
     speed = 2
     hit_points = 10
@@ -186,16 +192,71 @@ class Enemy(BaseCharacter, Harmable, Weapon):
     def __str__(self):
         return f"An Enemy {self.id}"
 
-    def pursue(self, sprite):
+    def update(self, player):
+        if self.status == "pursuing":
+            self.pursue(player)
+
         if self.is_stunned():
-            knockback_vector = self.get_knockback_vector(sprite)
+            knockback_vector = self.get_knockback_vector(player)
             self.move(knockback_vector, speed_scalar=3)
-        else:
-            destination_x = sprite.position[0] + random.randint(1,sprite.width)
-            destination_y = sprite.position[1] + random.randint(1,sprite.height)
-            direction = vec((destination_x-self.x, destination_y-self.y))
-            self.move(direction, Enemy.resolved_enemies)
+
+        if self.status == "dying":
+            dead_at = self.started_dying_at + self.death_sequence_duration
+
+            if now() > dead_at:
+                self.kill()
+            else:
+                self.image.set_alpha(255 * (1 - (now() - self.started_dying_at) / self.death_sequence_duration))
+
+    def pursue(self, sprite):
+        destination_x = sprite.position[0] + random.randint(1,sprite.width)
+        destination_y = sprite.position[1] + random.randint(1,sprite.height)
+        direction = vec((destination_x-self.x, destination_y-self.y))
+        self.move(direction, Enemy.resolved_enemies)
+
+    def render(self, screen):
+        super().render(screen)
+
+        if self.is_stunned():
+            print(f"{self} is stunned")
+            # Increment the stun sequence counter
+            self.stun_sequence += 1
+
+            # If the counter has reached a certain value, reset it to 0
+            if self.stun_sequence >= 10:
+                self.stun_sequence = 0
+
+            # Draw the enemy with alpha blending
+            alphas = [100, 200, 100, 200, 100, 200, 100, 200, 100, 200]
+            alpha = alphas[self.stun_sequence]
+            light_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            light_surface.fill((255, 255, 255, alpha))
+            screen.blit(light_surface, self.rect)
+
 
     def die(self):
+        self.status = "dying"
+        self.started_dying_at = now()
         print(f"{self} has died")
-        self.kill()
+
+    def is_stunned(self):
+        if self.status == "stunned":
+            if self.stunned_until_time is None:
+                self.status = self.default_status
+                return False
+            elif now() > self.stunned_until_time:
+                self.stunned_until_time = None
+                self.status = self.default_status
+                return False
+            else:
+                return True
+        else:
+            return False
+
+    def stun(self, duration):
+        # This method will prevent the sprite from moving for the specified duration
+        self.status = "stunned"
+        instant = now()
+        self.stunned_until_time = instant + duration
+        self.stun_start_time = instant
+        self.stun_sequence = 0

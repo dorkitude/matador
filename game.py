@@ -3,7 +3,7 @@ import random
 import itertools
 from math import ceil
 from globals import *
-from sprites import Player, Enemy, Weapon, Halo, sprites_to_render_first, sprites_to_render_second, sprites_to_render_third
+from sprites import Player, Enemy, Weapon, Halo, sprites_to_render_first, sprites_to_render_second, sprites_to_render_third, sprites_to_render_fourth
 import ui
 
 # Initialize Pygame
@@ -137,7 +137,7 @@ while running:
 
     # move the enemies
     for enemy in all_enemies:
-        enemy.pursue(player)
+        enemy.update(player)
         Enemy.resolved_enemies.add(enemy)
 
     # -------------------
@@ -160,13 +160,8 @@ while running:
     for sprite in sprites_to_render_third:
         sprite.render(screen)
 
-    # for weapon in Weapon.all_weapons.sprites():
-    #     weapon.render(screen)
-
-    # player.render(screen)
-
-    # for enemy in Enemy.all_enemies.sprites():
-    #     enemy.render(screen)
+    for sprite in sprites_to_render_fourth:
+        sprite.render(screen)
 
     pygame.display.update()
 

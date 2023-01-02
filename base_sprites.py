@@ -130,47 +130,4 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
 
 class BaseCharacter(BaseSprite, ABC):
 
-    stunned_until_time = None
-    stun_sequence = None
-
-    def render(self, screen):
-        if self.is_stunned():
-            # print(f"{self} is stunned")
-            # Increment the stun sequence counter
-            self.stun_sequence += 1
-
-            # If the counter has reached a certain value, reset it to 0
-            if self.stun_sequence >= 10:
-                self.stun_sequence = 0
-
-            # Draw the enemy with alpha blending
-            alphas = [100, 200, 100, 200, 100, 200, 100, 200, 100, 200]
-            alpha = alphas[self.stun_sequence]
-            light_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-            light_surface.fill((255, 255, 255, alpha))
-            screen.blit(self.image, self.rect)
-            screen.blit(light_surface, self.rect)
-        else:
-            screen.blit(self.image, self.rect)
-
-    def is_stunned(self):
-        if self.status == "stunned":
-            if self.stunned_until_time is None:
-                self.status = self.default_status
-                return False
-            elif now() > self.stunned_until_time:
-                self.stunned_until_time = None
-                self.status = self.default_status
-                return False
-            else:
-                return True
-        else:
-            return False
-
-    def stun(self, duration):
-        # This method will prevent the sprite from moving for the specified duration
-        self.status = "stunned"
-        instant = now()
-        self.stunned_until_time = instant + duration
-        self.stun_start_time = instant
-        self.stun_sequence = 0
+    pass

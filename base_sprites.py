@@ -50,9 +50,6 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
         return vec(self.rect.center).distance_to(vec(sprite.rect.center))
 
     def move(self, direction, collision_checks=None, speed_scalar=1):   # void
-        if self.is_stunned():
-            return
-
         # this is a method that moves the sprite in the direction of the vector
         # It will check for collisions with other sprites in the collision_checks
         # group.  If a collision is detected, the sprite will attempt to move in
@@ -147,7 +144,7 @@ class BaseCharacter(BaseSprite, ABC):
                 self.stun_sequence = 0
 
             # Draw the enemy with alpha blending
-            alphas = [0, 200, 0, 200, 0, 200, 0, 200, 0, 200]
+            alphas = [100, 200, 100, 200, 100, 200, 100, 200, 100, 200]
             alpha = alphas[self.stun_sequence]
             light_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             light_surface.fill((255, 255, 255, alpha))

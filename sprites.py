@@ -15,6 +15,12 @@ class Foo(object):
 class Harmable(ABC):
     # This is a mixin that handles hit points and damage
 
+    def get_knockback_vector(self, weapon):
+        knockback_vector = vec(self.rect.center) - vec(weapon.rect.center)
+        knockback_vector = knockback_vector.normalize()
+        return knockback_vector
+
+
     def take_damage_from(self, weapon):
 
         if weapon.is_damage_cooldown_expired(self):
@@ -23,14 +29,8 @@ class Harmable(ABC):
             self.hit_points -= real_damage
             weapon.start_cooldown_timer(self)
 
-            # print(f"{self} took {real_damage} damage from {weapon}, {self.hit_points} HP remaining")
-
-            # calculate and perform a knockback, based on the weapon (Player is immune)
+            # stun the sprite for a bit (player is immune to stun)
             if not isinstance(self, Player):
-                # print(f"{self} is bouncing back from {weapon}")
-                knockback_vector = vec(self.rect.center) - vec(weapon.rect.center)
-                knockback_vector = knockback_vector.normalize()
-                self.move(knockback_vector, speed_scalar=13)
                 self.stun(200)
 
             # make some text appear above the sprite that shows how much damage it took
@@ -179,10 +179,14 @@ class Enemy(BaseCharacter, Harmable, Weapon):
         return f"An Enemy {self.id}"
 
     def pursue(self, sprite):
-        destination_x = sprite.position[0] + random.randint(1,sprite.width)
-        destination_y = sprite.position[1] + random.randint(1,sprite.height)
-        direction = vec((destination_x-self.x, destination_y-self.y))
-        self.move(direction, Enemy.resolved_enemies)
+        if self.is_stunned():
+            knockback_vector = self.get_knockback_vector(sprite)
+            self.move(knockback_vector, speed_scalar=3)
+        else:
+            destination_x = sprite.position[0] + random.randint(1,sprite.width)
+            destination_y = sprite.position[1] + random.randint(1,sprite.height)
+            direction = vec((destination_x-self.x, destination_y-self.y))
+            self.move(direction, Enemy.resolved_enemies)
 
     def die(self):
         print(f"{self} has died")

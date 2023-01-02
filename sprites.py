@@ -2,6 +2,7 @@ from globals import *
 from abc import ABC, abstractmethod
 import random
 from base_sprites import BaseSprite, BaseCharacter
+from text_sprite import TextSprite
 
 
 sprites_to_render_first = pygame.sprite.Group()
@@ -34,7 +35,14 @@ class Harmable(ABC):
                 self.stun(200)
 
             # make some text appear above the sprite that shows how much damage it took
-
+            damage_alert = TextSprite(
+                text=str(real_damage),
+                position=(self.rect.midtop[0] + 8, self.rect.midtop[1] - 30),
+                font_size=36,
+                color=RED,
+                dissolve_after=500,
+            )
+            sprites_to_render_third.add(damage_alert)
 
             # if the sprite has no hit points left, kill it
             if self.hit_points <= 0:

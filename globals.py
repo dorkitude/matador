@@ -23,6 +23,11 @@ SPEED_MODIFIER = 0.04
 
 STARTING_HALO_RADIUS = 50
 
+
+# colors
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+
 # seconds between each spawn
 GLOBAL_SPAWN_RATE = 3
 

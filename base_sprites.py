@@ -135,7 +135,7 @@ class BaseCharacter(BaseSprite, ABC):
 
     def render(self, screen):
         if self.is_stunned():
-            print(f"{self} is stunned")
+            # print(f"{self} is stunned")
             # Increment the stun sequence counter
             self.stun_sequence += 1
 

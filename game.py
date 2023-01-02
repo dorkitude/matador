@@ -148,13 +148,14 @@ while running:
     setup_background()
 
     # next, render floor-level stuff
-    for weapon in Weapon.all_weapons.sprites():
-        screen.blit(weapon.image, weapon.position)
 
-    screen.blit(player.image, player.position)
+    for weapon in Weapon.all_weapons.sprites():
+        weapon.render(screen)
+
+    player.render(screen)
 
     for enemy in Enemy.all_enemies.sprites():
-        screen.blit(enemy.image, enemy.position)
+        enemy.render(screen)
 
     pygame.display.update()
 

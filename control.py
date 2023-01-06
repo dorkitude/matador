@@ -6,6 +6,7 @@ import itertools
 from sprites import Player, Weapon, Halo, sprites_to_render_first, sprites_to_render_second, sprites_to_render_third, sprites_to_render_fourth
 from enemy import Enemy
 from globals import *
+import hud
 
 
 class Control(object):
@@ -15,8 +16,13 @@ class Control(object):
     # Create the window
     self.screen = pygame.display.set_mode(window_size)
 
-  # Set the title
+    self.active_sprites = pygame.sprite.Group()
+
+    # Set the title
     pygame.display.set_caption("Matador Sandbox")
+
+    # establish the hud
+    self.hud = hud
 
     # make the player
     player = Player(x=100, y=250)
@@ -24,7 +30,10 @@ class Control(object):
     self.player = player
 
   def update(self):
+    player = self.player
+
     # Handle events
+    # -------------
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -41,11 +50,11 @@ class Control(object):
         if event.type == pygame.KEYDOWN:
                 pass
 
+    # Handle WASD and Arrow-key input
     self.player.velocity = self.get_velocity_from_keyboard()
 
-
     # Update the game state
-    player = self.player
+    # ---------------------
 
     # check for damage
     for enemy in Enemy.all_enemies.sprites():
@@ -59,10 +68,8 @@ class Control(object):
     # Move the player
     player.update(self)
 
-    all_enemies = Enemy.all_enemies.sprites()
-
     # sort the enemies by distance to the player
-    all_enemies = sorted(all_enemies, key=lambda enemy: enemy.distance_to(player))
+    all_enemies = sorted(Enemy.all_enemies.sprites(), key=lambda enemy: enemy.distance_to(player))
 
     # make a group of enemies whose movement is resolved
     Enemy.resolved_enemies = pygame.sprite.Group()

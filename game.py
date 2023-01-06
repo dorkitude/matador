@@ -1,6 +1,5 @@
 from math import ceil
 from globals import *
-import ui
 from control import Control
 from sprites import sprites_to_render_first, sprites_to_render_second, sprites_to_render_third, sprites_to_render_fourth
 from enemy import Enemy
@@ -23,8 +22,6 @@ while running:
     # Update the display
     # -------------------
 
-    # show/update player HP bar in top-peft
-    ui.render_player_stats(control.player)
 
     # first, handle map and background stuff
     control.setup_background()
@@ -41,6 +38,8 @@ while running:
 
     for sprite in sprites_to_render_fourth:
         sprite.render(screen)
+
+    control.hud.render(screen, control)
 
     pygame.display.update()
 

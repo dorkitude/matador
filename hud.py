@@ -1,7 +1,7 @@
 from globals import *
 
 
-def render_player_stats(player):
+def render(screen, control):
   # print(f"rendering player stats")
   # WIP / TODO
 

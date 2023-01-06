@@ -114,10 +114,15 @@ class Player(BaseCharacter, Harmable):
     halo = None
     status = None
 
-    def __init__(self):
+    def __init__(self, x, y):
         super().__init__()
         self.image = pygame.image.load("sprites/matador.png").convert()
         self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        # make the starting weapon
+        self.halo = Halo(self, STARTING_HALO_RADIUS)
+        sprites_to_render_first.add(self.halo)
 
     def __str__(self):
         return f"Player {self.id}"
@@ -188,6 +193,43 @@ class Enemy(BaseCharacter, Harmable, Weapon):
     @property
     def damage(self):
         return self._damage
+
+    @classmethod
+    def spawn_enemies(cls):
+        # Ramp:  every 5 seconds since launch, increase the spawn rate
+        spawn_count = random.randint(1,3)
+        seconds_since_launch = now() - start_time
+        spawn_count += 2*int(seconds_since_launch / 5000)
+
+        # print(f"spawning {spawn_count} enemies")
+        zone_topleft = (750, 50)
+        zone_bottomright = (950, 700)
+
+        for i in range(spawn_count):
+            enemy = Enemy()
+            enemy.x = random.randint(zone_topleft[0], zone_bottomright[0])
+            enemy.y = random.randint(zone_topleft[1], zone_bottomright[1])
+
+            # try not to let this enemy overlap with any others
+            placement_tries = 10
+            tries_attempted = 0
+            skip_this_enemy = False
+            while tries_attempted < placement_tries and enemy.collides_with_any(Enemy.all_enemies):
+                tries_attempted += 1
+                print(f"attempt {tries_attempted} collided: {enemy.collides_with_any(Enemy.all_enemies).rect}")
+                enemy.x = random.randint(zone_topleft[0], zone_bottomright[0])
+                enemy.y = random.randint(zone_topleft[1], zone_bottomright[1])
+                if tries_attempted == placement_tries:
+                    skip_this_enemy = True
+
+            if skip_this_enemy:
+                enemy.kill()
+                continue
+            else:
+                sprites_to_render_third.add(enemy)
+                Enemy.all_enemies.add(enemy)
+                Enemy.pursuing_enemies.add(enemy)
+
 
     def __str__(self):
         return f"An Enemy {self.id}"

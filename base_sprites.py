@@ -129,5 +129,4 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
 
 
 class BaseCharacter(BaseSprite, ABC):
-
     pass

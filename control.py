@@ -3,7 +3,8 @@ import random
 import pygame
 from math import ceil
 import itertools
-from sprites import Player, Enemy, Weapon, Halo, sprites_to_render_first, sprites_to_render_second, sprites_to_render_third, sprites_to_render_fourth
+from sprites import Player, Weapon, Halo, sprites_to_render_first, sprites_to_render_second, sprites_to_render_third, sprites_to_render_fourth
+from enemy import Enemy
 from globals import *
 
 

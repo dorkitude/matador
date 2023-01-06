@@ -2,7 +2,8 @@ from math import ceil
 from globals import *
 import ui
 from control import Control
-from sprites import Enemy, sprites_to_render_first, sprites_to_render_second, sprites_to_render_third, sprites_to_render_fourth
+from sprites import sprites_to_render_first, sprites_to_render_second, sprites_to_render_third, sprites_to_render_fourth
+from enemy import Enemy
 
 # Initialize Pygame
 control = Control()

@@ -48,12 +48,17 @@ class Harmable(ABC):
             )
             sprites_to_render_fourth.add(damage_alert)
 
+            self.after_damage_taken()
+
             # if the sprite has no hit points left, kill it
             if self.hit_points <= 0:
                 self.die()
         else:
             # print(f"{weapon} cannot hurt {self} because it's on cooldown!")
             return
+
+    def after_damage_taken(self):
+        pass
 
     @abstractmethod
     def die(self):
@@ -124,6 +129,7 @@ class Player(BaseCharacter, Harmable):
         # make the starting weapon
         self.halo = Halo(self, STARTING_HALO_RADIUS)
         sprites_to_render_first.add(self.halo)
+        self.hurt_sound = pygame.mixer.Sound("sounds/ouch.wav")
 
     def __str__(self):
         return f"Player {self.id}"
@@ -131,6 +137,9 @@ class Player(BaseCharacter, Harmable):
     def die(self):
         print(f"{self} has died")
         self.kill()
+
+    def after_damage_taken(self):
+        self.hurt_sound.play()
 
     @property
     def weapons(self):
@@ -158,9 +167,41 @@ class Halo(BaseSprite, Weapon):
         self.image = pygame.Surface((radius*2, radius*2))
         self.rect = self.image.get_rect()
         self.radius = radius
-        pygame.draw.circle(self.image, (255, 255, 255, 128), (radius, radius), radius)
+        pygame.draw.circle(self.image, SOFT_YELLOW, (radius, radius), radius)
         player.halo = self
         player.after_move()
+
+    def collides_with(self, sprite):
+        super_collider = super().collides_with(sprite)
+
+        # check if my circle collides with the sprite's rect
+        if super_collider:
+
+            # check if the sprite's rect is inside the circle
+            circle_x = self.rect.center[0]
+            circle_y = self.rect.center[1]
+            radius = self.radius
+
+            # find which corner of the rect is closest to the center of the circle
+            dx = abs(circle_x - sprite.x - sprite.rect.width / 2)
+            dy = abs(circle_y - sprite.y - sprite.rect.height / 2)
+            if dx > sprite.rect.width / 2 + self.radius:
+                return False
+            elif dy > sprite.height / 2 + self.radius:
+                return False
+            else:
+                if dx <= sprite.rect.width / 2:
+                    return True
+                elif dy <= sprite.rect.height / 2:
+                    return True
+                else:
+                    corner_distance_sq = (dx - sprite.rect.width / 2) ** 2 + (dy - sprite.rect.height / 2) ** 2
+                    if corner_distance_sq <= self.radius ** 2:
+                        return True
+                    else:
+                        return False
+
+        return False
 
     def __str__(self):
         return f"Halo {self.id}"

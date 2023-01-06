@@ -32,6 +32,9 @@ class Enemy(BaseCharacter, Harmable, Weapon):
             self.image = pygame.image.load("sprites/skull_v1_4.png").convert_alpha()
         self.rect = self.image.get_rect()
 
+
+        self.hurt_sound = pygame.mixer.Sound("sounds/punch.wav")
+
     @property
     def damage(self):
         return self._damage
@@ -71,6 +74,9 @@ class Enemy(BaseCharacter, Harmable, Weapon):
                 sprites_to_render_third.add(enemy)
                 Enemy.all_enemies.add(enemy)
                 Enemy.pursuing_enemies.add(enemy)
+
+    def after_damage_taken(self):
+        self.hurt_sound.play()
 
 
     def __str__(self):

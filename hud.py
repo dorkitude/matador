@@ -17,7 +17,7 @@ class Hud(object):
         # print(f"rendering player stats")
 
         # render the player's health
-        health_bar = pygame.Surface((control.player.hit_points, 20))
+        health_bar = pygame.Surface((max(0, control.player.hit_points), 20))
 
         hit_points = TextSprite(
             text=f"{control.player.hit_points}",

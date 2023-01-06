@@ -2,7 +2,8 @@ import pygame
 import random
 from globals import *
 from base_sprites import BaseCharacter
-from sprites import Harmable, Weapon, sprites_to_render_third
+from sprites import Harmable, sprites_to_render_third
+from weapons import Weapon
 
 class Enemy(BaseCharacter, Harmable, Weapon):
 

@@ -68,7 +68,7 @@ class Control(object):
         # ---------------------
 
         # check for damage
-        for enemy in Enemy.all_enemies.sprites():
+        for enemy in Enemy.living_enemies.sprites():
             if enemy.collides_with(player):
                 player.take_damage_from(enemy)
 
@@ -94,8 +94,8 @@ class Control(object):
             enemy.update(self)
             Enemy.resolved_enemies.add(enemy)
 
-    def get_closest_enemy(self, thing):
-        enemies = sorted(Enemy.all_enemies.sprites(), key=lambda enemy: enemy.distance_to(thing))
+    def get_closest_living_enemy(self, thing):
+        enemies = sorted(Enemy.living_enemies.sprites(), key=lambda enemy: enemy.distance_to(thing))
         if enemies:
             return enemies[0]
         else:

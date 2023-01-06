@@ -32,7 +32,7 @@ class Harmable(ABC):
             # randomize damage by 12% in either direction
             real_damage = int(weapon.damage * (1 + random.uniform(-0.12, 0.12)))
             self.hit_points -= real_damage
-            weapon.start_cooldown_timer(self)
+            weapon.start_damage_cooldown_timer(self)
 
             # stun the sprite for a bit
             if self.stunnable:

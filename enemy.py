@@ -9,6 +9,7 @@ class Enemy(BaseCharacter, Harmable, Weapon):
 
     default_status = "pursuing"
     all_enemies = pygame.sprite.Group()
+    living_enemies = pygame.sprite.Group()
     resolved_enemies = pygame.sprite.Group()
     pursuing_enemies = pygame.sprite.Group()
     death_sequence_duration = 1000
@@ -74,6 +75,7 @@ class Enemy(BaseCharacter, Harmable, Weapon):
             else:
                 sprites_to_render_third.add(enemy)
                 Enemy.all_enemies.add(enemy)
+                Enemy.living_enemies.add(enemy)
                 Enemy.pursuing_enemies.add(enemy)
 
     def after_damage_taken(self, weapon):
@@ -128,6 +130,7 @@ class Enemy(BaseCharacter, Harmable, Weapon):
 
     def die(self):
         self.status = "dying"
+        Enemy.living_enemies.remove(self)
         self.started_dying_at = now()
         print(f"{self} has died")
 

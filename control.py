@@ -40,6 +40,38 @@ class Control(object):
         if event.type == pygame.KEYDOWN:
                 pass
 
+    self.player.velocity = self.get_velocity_from_keyboard()
+
+
+    # Update the game state
+    player = self.player
+
+    # check for damage
+    for enemy in Enemy.all_enemies.sprites():
+        if enemy.collides_with(player):
+            player.take_damage_from(enemy)
+
+        for weapon in Weapon.all_weapons.sprites():
+            if weapon.collides_with(enemy):
+                enemy.take_damage_from(weapon)
+
+    # Move the player
+    player.update(self)
+
+    all_enemies = Enemy.all_enemies.sprites()
+
+    # sort the enemies by distance to the player
+    all_enemies = sorted(all_enemies, key=lambda enemy: enemy.distance_to(player))
+
+    # make a group of enemies whose movement is resolved
+    Enemy.resolved_enemies = pygame.sprite.Group()
+
+    # move the enemies
+    for enemy in all_enemies:
+        enemy.update(self)
+        Enemy.resolved_enemies.add(enemy)
+
+  def get_velocity_from_keyboard(self):
     # Handle WASD and Arrow-key input
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT] or keys[pygame.K_a]:
@@ -55,37 +87,7 @@ class Control(object):
     else:
         vel_y = 0  # Stop movement
 
-    player_velocity = vec(vel_x, vel_y)
-
-    # Update the game state
-    player = self.player
-
-    # check for damage
-    for enemy in Enemy.all_enemies.sprites():
-        if enemy.collides_with(player):
-            player.take_damage_from(enemy)
-
-        for weapon in Weapon.all_weapons.sprites():
-            if weapon.collides_with(enemy):
-                enemy.take_damage_from(weapon)
-
-    # Move the player
-    if player_velocity.length() > 0:
-        player.move(player_velocity)
-
-    all_enemies = Enemy.all_enemies.sprites()
-
-    # sort the enemies by distance to the player
-    all_enemies = sorted(all_enemies, key=lambda enemy: enemy.distance_to(player))
-
-    # make a group of enemies whose movement is resolved
-    Enemy.resolved_enemies = pygame.sprite.Group()
-
-    # move the enemies
-    for enemy in all_enemies:
-        enemy.update(player)
-        Enemy.resolved_enemies.add(enemy)
-
+    return vec(vel_x, vel_y)
 
   def setup_background(self):
     tile = pygame.image.load("sprites/desert_tile.png")

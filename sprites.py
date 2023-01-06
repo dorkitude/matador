@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import random
 from base_sprites import BaseSprite, BaseCharacter
 from text_sprite import TextSprite
+from pygame import PixelArray
 
 
 sprites_to_render_first = pygame.sprite.Group()
@@ -137,6 +138,10 @@ class Player(BaseCharacter, Harmable):
             self._weapons = pygame.sprite.Group()
         return self._weapons
 
+    def update(self, control):
+        if self.velocity.length() > 0:
+            self.move(self.velocity)
+
     def after_move(self):
         if self.halo:
             self.halo.x = (self.x + self.width/2) - self.halo.radius
@@ -187,7 +192,7 @@ class Enemy(BaseCharacter, Harmable, Weapon):
         else:
             self.hit_points = 15
             self._damage = 3
-            self.image = pygame.image.load("sprites/skull_v1_4.png").convert()
+            self.image = pygame.image.load("sprites/skull_v1_4.png").convert_alpha()
         self.rect = self.image.get_rect()
 
     @property
@@ -234,12 +239,12 @@ class Enemy(BaseCharacter, Harmable, Weapon):
     def __str__(self):
         return f"An Enemy {self.id}"
 
-    def update(self, player):
+    def update(self, control):
         if self.status == "pursuing":
-            self.pursue(player)
+            self.pursue(control.player)
 
         if self.is_stunned():
-            knockback_vector = self.get_knockback_vector(player)
+            knockback_vector = self.get_knockback_vector(control.player)
             self.move(knockback_vector, speed_scalar=3)
 
         if self.status == "dying":
@@ -260,7 +265,7 @@ class Enemy(BaseCharacter, Harmable, Weapon):
         super().render(screen)
 
         if self.is_stunned():
-            print(f"{self} is stunned")
+            # print(f"{self} is stunned")
             # Increment the stun sequence counter
             self.stun_sequence += 1
 

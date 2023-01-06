@@ -127,6 +127,8 @@ class BaseSprite(pygame.sprite.Sprite, ABC):
     def collides_with_any(self, sprite_group): #bool
         return pygame.sprite.spritecollideany(self, sprite_group)
 
-
 class BaseCharacter(BaseSprite, ABC):
+    pass
+
+class BaseParticle(BaseSprite, ABC):
     pass

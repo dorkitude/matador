@@ -122,7 +122,7 @@ class Player(BaseCharacter, Harmable):
 
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.image.load("sprites/matador.png").convert()
+        self.image = pygame.image.load("sprites/matador.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y

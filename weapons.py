@@ -1,5 +1,5 @@
 from globals import *
-from sprites import BaseSprite, Harmable, sprites_to_render_first
+from sprites import BaseSprite, Harmable, sprites_to_render_first, sprites_to_render_fourth
 import pygame
 from abc import ABC, abstractmethod
 
@@ -9,10 +9,15 @@ class Weapon(ABC):
 
     # This is a mixin that handles anything that can deal damage
 
-    # this is the amount of damage to take
+
+    # this is the amount of damage to deal
     @property
     def damage(self):
-        pass
+        return self._damage
+
+    @damage.setter
+    def damage(self, value):
+        self._damage = value
 
     # Cooldown logic.
     # ----------------------------------------------------
@@ -36,6 +41,10 @@ class Weapon(ABC):
         else:
             return False
 
+    # this is reported by the Harmable after it takes damage from me
+    def report_damage_taken(self, harmable):
+        pass
+
     def start_cooldown_timer(self, target):
         if self.last_recorded_damage is None:
             self.last_recorded_damage = {}
@@ -50,10 +59,96 @@ class Weapon(ABC):
         else:
             return -10000000 # give a time in the past
 
+class MagicWand(BaseSprite, Weapon):
+    _damage = 3
+    speed = 4
+
+    def __init__(self, player, control):
+        super().__init__()
+        Weapon.all_weapons.add(self)
+
+        self.player = player
+        self.control = control
+        self.projectiles_per_fire = 1
+        self.projectiles = pygame.sprite.Group()
+
+        # we'll use this as a firing cooldown for now
+        self.damage_cooldown = 500
+
+    def collides_with(self, enemy):
+        return False
+
+    def update(self):
+        self.rect = self.player.rect
+        self.x = self.player.x
+        self.y = self.player.y
+
+        if self.is_damage_cooldown_expired(self.player):
+            print("wand is firing")
+            self.start_cooldown_timer(self.player)
+            self.fire()
+
+    def fire(self):
+        target = self.control.get_closest_enemy(self.player)
+
+        if target is None:
+            return False
+
+        for i in range(self.projectiles_per_fire):
+            projectile = Projectile(
+                shooter=self,
+                target=target,
+                speed=self.speed,
+                damage=self.damage
+            )
+            self.projectiles.add(projectile)
+
+
+class Projectile(BaseSprite, Weapon):
+
+    image = None
+
+    def __init__(self, shooter, target, speed, damage):
+        super().__init__()
+        Weapon.all_weapons.add(self)
+
+        self.shooter = shooter
+        self.target = target
+        self.speed = speed
+        self.damage = damage
+
+        # save the image to a class variable so we don't have to load it every time
+        if Projectile.image is None:
+            Projectile.image = pygame.image.load("sprites/redbubble.png").convert_alpha()
+        self.image = Projectile.image
+
+        self.rect = self.image.get_rect()
+        self.x = shooter.x
+        self.y = shooter.y
+
+        self.vector = vec(target.rect.center) - vec(shooter.rect.center)
+        self.vector = self.vector.normalize()
+
+        self.after_move()
+
+    def pursue(self, sprite):
+        destination_x = sprite.rect.center[0]
+        destination_y = sprite.rect.center[1]
+        direction = vec((destination_x-self.x, destination_y-self.y))
+        self.move(direction)
+
+    def update(self):
+        self.pursue(self.target)
+        sprites_to_render_fourth.add(self)
+
+    # only does damage to one thing, then fizzles
+    def report_damage_taken(self, harmable):
+        self.kill()
+
 
 class Halo(BaseSprite, Weapon):
 
-    damage = 10
+    _damage = 10
 
     def __init__(self, player, radius):
         super().__init__()

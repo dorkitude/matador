@@ -48,7 +48,7 @@ class Harmable(ABC):
             )
             sprites_to_render_fourth.add(damage_alert)
 
-            self.after_damage_taken()
+            self.after_damage_taken(weapon)
 
             # if the sprite has no hit points left, kill it
             if self.hit_points <= 0:
@@ -57,7 +57,7 @@ class Harmable(ABC):
             # print(f"{weapon} cannot hurt {self} because it's on cooldown!")
             return
 
-    def after_damage_taken(self):
+    def after_damage_taken(weapon):
         pass
 
     @abstractmethod

@@ -76,8 +76,9 @@ class Enemy(BaseCharacter, Harmable, Weapon):
                 Enemy.all_enemies.add(enemy)
                 Enemy.pursuing_enemies.add(enemy)
 
-    def after_damage_taken(self):
+    def after_damage_taken(self, weapon):
         self.hurt_sound.play()
+        weapon.report_damage_taken(self)
 
 
     def __str__(self):

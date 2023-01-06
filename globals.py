@@ -28,6 +28,7 @@ STARTING_HALO_RADIUS = 75
 
 # colors
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 SOFT_YELLOW = (255, 255, 127, 1)
 

@@ -6,7 +6,7 @@ import itertools
 from sprites import Player, Weapon, Halo, sprites_to_render_first, sprites_to_render_second, sprites_to_render_third, sprites_to_render_fourth
 from enemy import Enemy
 from globals import *
-import hud
+from hud import Hud
 
 
 class Control(object):
@@ -22,7 +22,7 @@ class Control(object):
     pygame.display.set_caption("Matador Sandbox")
 
     # establish the hud
-    self.hud = hud
+    self.hud = Hud()
 
     # make the player
     player = Player(x=100, y=250)
